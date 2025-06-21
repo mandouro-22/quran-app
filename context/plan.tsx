@@ -5,20 +5,22 @@ import React from "react";
 export interface PlanData {
   number: number;
   name: string;
-  englishName: string;
-  englishNameTranslation: string;
+  // englishName: string;
+  // englishNameTranslation: string;
   numberOfAyahs: number;
-  revelationType: string;
+  // revelationType: string;
 }
 
 interface PlanContextType {
-  plan: PlanData[] | null;
+  surahAndAyah: PlanData[] | null;
 }
 
 const PlanContext = React.createContext<PlanContextType | undefined>(undefined);
 
 const PlanProvider = ({ children }: { children: React.ReactNode }) => {
-  const [plan, setPlan] = React.useState<PlanData[] | null>(null);
+  const [surahAndAyah, setSurahAndAyah] = React.useState<PlanData[] | null>(
+    null
+  );
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -36,7 +38,7 @@ const PlanProvider = ({ children }: { children: React.ReactNode }) => {
           return;
         }
 
-        setPlan(response.data.data);
+        setSurahAndAyah(response.data.data);
       } catch (error) {
         console.error(error);
       }
@@ -45,7 +47,9 @@ const PlanProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <PlanContext.Provider value={{ plan }}>{children}</PlanContext.Provider>
+    <PlanContext.Provider value={{ surahAndAyah }}>
+      {children}
+    </PlanContext.Provider>
   );
 };
 

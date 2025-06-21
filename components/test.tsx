@@ -1,9 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
+import { usePlan } from "@/context/plan";
+import { PlanGenerator } from "@/service/plan.service";
+// import { generatePlan } from "@/service/plan.service";
+interface planOfHifz {
+  day: string;
+  from_surah: string;
+  from_ayah: number;
+  to_surah: string;
+  to_ayah: number;
+  review_type: string;
+  date: Date;
+  is_review: boolean;
+}
 
 export default function Test() {
   const [formData, setFormData] = useState<{ years: number; month: number }>({
@@ -11,39 +24,26 @@ export default function Test() {
     month: 0,
   });
 
-  const [plan, setPlan] = useState(null);
+  const totalSurahAndAyah = usePlan();
+  const surahAndAyah = totalSurahAndAyah?.surahAndAyah;
 
-  const generatePlan = (manth: number, years: number) => {
-    const totalAyats = 6236;
-    const totalMonth = manth + years * 12;
-    const totalDays = totalMonth * 30;
-    const ayaPerDay = Math.ceil(totalAyats / totalDays);
-    const totalDaysOfWeek = 7;
-    const daysName = [
-      "السبت",
-      "الاحد",
-      "الاثنين",
-      "الثلاث",
-      "الاربع",
-      "الخميس",
-      "الجمعه",
-    ];
+  const [plan, setPlan] = useState<planOfHifz[] | null>(null);
 
-    let ayahCounter = 1;
-    for (let i = 1; i < totalDays; i++) {
-      const dayName = daysName[i % totalDaysOfWeek];
-      const fromAyah = ayahCounter;
-      const toAyah = Math.min(ayahCounter + ayaPerDay - 1, totalAyats);
-      ayahCounter = toAyah + 1;
-      console.log(ayahCounter);
-      if (ayahCounter > totalAyats) break;
-    }
-  };
+  const generatePlanOfHifz = React.useCallback(
+    (month: number, years: number) => {
+      const planFun = surahAndAyah
+        ? new PlanGenerator(month, years, surahAndAyah).generate()
+        : null;
+      if (!planFun) return;
+      setPlan(planFun);
+    },
+    [surahAndAyah]
+  );
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    generatePlan(formData.month, formData.years);
+    generatePlanOfHifz(formData.month, formData.years);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,7 +91,36 @@ export default function Test() {
           تم انشاء خطه الحفظ
         </div>
 
-        {plan ? <div>Plan Generated</div> : null}
+        {plan ? (
+          <div>
+            {plan && plan.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 my-3">
+                {plan.map((item, index) => (
+                  <div
+                    key={index}
+                    className="space-y-2 border border-gray-500 p-2 rounded-lg">
+                    <div className="text-lg font-medium">
+                      {item.day} {item.date.toDateString()}
+                    </div>
+                    <div className="text-lg font-medium bg-blue-300 w-fit px-4 py-1 rounded-lg">
+                      {item.review_type}
+                    </div>
+                    <div className="text-lg font-medium">
+                      {item.from_surah} {item.from_ayah}
+                    </div>
+                    <div className="text-lg font-medium">
+                      {item.to_surah} {item.to_ayah}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-lg font-medium">لا يوجد خطه حفظ</div>
+            )}
+          </div>
+        ) : (
+          <div className="text-lg font-medium">لا يوجد خطه حفظ</div>
+        )}
       </div>
     </div>
   );
