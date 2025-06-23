@@ -121,11 +121,11 @@ export class PlanGenerator {
   ) {
     this.totalAyah = this.surahs.reduce((sum, s) => sum + s.numberOfAyahs, 0);
     const totalMonth = years * 12 + month;
-    this.totalDays = Math.floor(totalMonth * 30.42); // تصحيح متوسط أيام الشهر
+    this.totalDays = Math.floor(totalMonth * 30.42);
 
-    const weeklyReviewDays = Math.floor(this.totalDays / 7); // يوم واحد كل أسبوع
-    const monthlyReviewDays = Math.floor(this.totalDays / 30) * 2; // يومان كل شهر
-    const twoMonthlyReviewDays = Math.floor(this.totalDays / 60) * 7; // 6 أيام مراجعة + يوم إجازة
+    const weeklyReviewDays = Math.floor(this.totalDays / 7);
+    const monthlyReviewDays = Math.floor(this.totalDays / 30) * 2;
+    const twoMonthlyReviewDays = Math.floor(this.totalDays / 60) * 7;
 
     this.totalReviewDays =
       weeklyReviewDays + monthlyReviewDays + twoMonthlyReviewDays;
@@ -141,14 +141,12 @@ export class PlanGenerator {
       currentDay.setDate(currentDay.getDate() + day);
       const dayName = this.DayOfWeek[day % 7];
 
-      // التحقق من أيام المراجعة والإجازة
       const reviewDaysUsed = this.generateReviewDays(day, currentDay);
       if (reviewDaysUsed > 0) {
         day += reviewDaysUsed;
         continue;
       }
 
-      // إضافة يوم حفظ
       const range = this.tracker.getNextAyahRange(this.ayahPerDay);
       if (range) {
         const actualAyahsToday = Math.min(
@@ -203,7 +201,6 @@ export class PlanGenerator {
       });
     };
 
-    // مراجعة كل شهرين (6 أيام مراجعة + يوم إجازة)
     if (
       day > 0 &&
       day % 60 === 59 &&
@@ -218,10 +215,9 @@ export class PlanGenerator {
       }
 
       this.revisionManager.clearTwoMonthly();
-      return 7; // 6 أيام مراجعة + يوم إجازة
+      return 7;
     }
 
-    // مراجعة شهرية (يومان)
     if (
       day > 0 &&
       day % 30 === 29 &&
@@ -236,10 +232,9 @@ export class PlanGenerator {
       }
 
       this.revisionManager.clearMonthly();
-      return 2; // يومان للمراجعة
+      return 2;
     }
 
-    // مراجعة أسبوعية (يوم واحد)
     if (
       day > 0 &&
       day % 7 === 6 &&
@@ -249,9 +244,9 @@ export class PlanGenerator {
       addSingleReview(all, "مراجعة أسبوعية");
 
       this.revisionManager.clearWeekly();
-      return 1; // يوم واحد للمراجعة
+      return 1;
     }
 
-    return 0; // لا مراجعة
+    return 0;
   }
 }
