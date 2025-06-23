@@ -63,6 +63,6 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply relative min-h-screen  bg-white dark:bg-[#0f0c29] transition-colors;
   }
 }

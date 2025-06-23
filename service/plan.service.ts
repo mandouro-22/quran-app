@@ -1,3 +1,5 @@
+import { Plan, PlanDay } from "@/types/type";
+
 interface SurahAndAyahType {
   name: string;
   numberOfAyahs: number;
@@ -11,67 +13,50 @@ interface RevisionType {
   date: Date;
 }
 
-interface PlanDay {
-  day: string;
-  from_surah: string;
-  from_ayah: number;
-  to_surah: string;
-  to_ayah: number;
-  review_type: string;
-  date: Date;
-  is_review: boolean;
-}
-
-// interface AyahRange {
-//   fromSurah: number;
-//   fromAyah: number;
-//   toSurah: number;
-//   toAyah: number;
-// }
-
 class SurahProgressTracker {
-  private currentSurrahIndex = 0;
+  private currentSurahIndex = 0;
   private currentAyahsInSurah = 1;
   private surahs: SurahAndAyahType[];
   constructor(surahs: SurahAndAyahType[]) {
     this.surahs = surahs;
   }
 
-  getNextAyahRenge(count: number) {
-    let ramining = count;
+  getNextAyahRange(count: number) {
+    let remaining = count;
     const fromAyah = this.currentAyahsInSurah;
-    const fromSurah = this.currentSurrahIndex;
+    const fromSurah = this.currentSurahIndex;
 
-    while (ramining > 0 && this.currentSurrahIndex < this.surahs.length) {
+    while (remaining > 0 && this.currentSurahIndex < this.surahs.length) {
       const ayahsLeft =
-        this.surahs[this.currentSurrahIndex].numberOfAyahs -
-        this.currentAyahsInSurah;
+        this.surahs[this.currentSurahIndex].numberOfAyahs -
+        this.currentAyahsInSurah +
+        1;
 
-      if (ramining <= ayahsLeft) {
-        this.currentAyahsInSurah += ramining;
-        ramining = 0;
+      if (remaining <= ayahsLeft) {
+        this.currentAyahsInSurah += remaining;
+        remaining = 0;
       } else {
-        ramining -= ayahsLeft;
-        this.currentSurrahIndex++;
+        remaining -= ayahsLeft;
+        this.currentSurahIndex++;
         this.currentAyahsInSurah = 1;
       }
-
-      const toSurah =
-        this.currentSurrahIndex < this.surahs.length
-          ? this.currentSurrahIndex
-          : this.surahs.length - 1;
-      const toAyah =
-        this.currentSurrahIndex < this.surahs.length
-          ? this.currentAyahsInSurah - 1
-          : this.surahs[this.surahs.length - 1].numberOfAyahs;
-
-      return {
-        fromAyah,
-        fromSurah,
-        toAyah,
-        toSurah,
-      };
     }
+
+    const toSurah =
+      this.currentSurahIndex < this.surahs.length
+        ? this.currentSurahIndex
+        : this.surahs.length - 1;
+    const toAyah =
+      this.currentSurahIndex < this.surahs.length
+        ? this.currentAyahsInSurah - 1
+        : this.surahs[this.surahs.length - 1].numberOfAyahs;
+
+    return {
+      fromAyah,
+      fromSurah,
+      toAyah,
+      toSurah,
+    };
   }
 }
 
@@ -97,37 +82,37 @@ class RevisionManager {
   }
 
   clearWeekly() {
-    return (this.weekly = []);
+    this.weekly = [];
   }
   clearMonthly() {
-    return (this.monthly = []);
+    this.monthly = [];
   }
   clearTwoMonthly() {
-    return (this.twoMonthly = []);
+    this.twoMonthly = [];
   }
 }
 
 export class PlanGenerator {
   private readonly DayOfWeek = [
-    ,
     "السبت",
-    "الاحد",
-    "الاتنين",
+    "الأحد",
+    "الإثنين",
     "الثلاثاء",
-    "الاربعاء",
+    "الأربعاء",
     "الخميس",
     "الجمعة",
   ];
 
   private readonly totalAyah: number;
   private readonly totalDays: number;
-
   private readonly actualMemorizationDays: number;
   private readonly ayahPerDay: number;
   private readonly tracker: SurahProgressTracker;
   private readonly revisionManager = new RevisionManager();
   private totalAyahsMemorized = 0;
+  private totalReviewDays = 0;
   private readonly planOfHifz: PlanDay[] = [];
+
   constructor(
     private month: number,
     private years: number,
@@ -136,62 +121,68 @@ export class PlanGenerator {
   ) {
     this.totalAyah = this.surahs.reduce((sum, s) => sum + s.numberOfAyahs, 0);
     const totalMonth = years * 12 + month;
-    this.totalDays = Math.floor(totalMonth * 30.44);
+    this.totalDays = Math.floor(totalMonth * 30.42); // تصحيح متوسط أيام الشهر
 
-    const weeklyReviewDays = Math.floor(this.totalDays / 7);
-    const monthlyReviewDays = Math.floor(this.totalDays / 30) * 2;
-    const twoMonthlyReviewDays = Math.floor(this.totalDays / 60) * 6;
+    const weeklyReviewDays = Math.floor(this.totalDays / 7); // يوم واحد كل أسبوع
+    const monthlyReviewDays = Math.floor(this.totalDays / 30) * 2; // يومان كل شهر
+    const twoMonthlyReviewDays = Math.floor(this.totalDays / 60) * 7; // 6 أيام مراجعة + يوم إجازة
 
-    const totalReviewDays =
+    this.totalReviewDays =
       weeklyReviewDays + monthlyReviewDays + twoMonthlyReviewDays;
-    this.actualMemorizationDays = this.totalDays - totalReviewDays;
+    this.actualMemorizationDays = this.totalDays - this.totalReviewDays;
     this.ayahPerDay = Math.ceil(this.totalAyah / this.actualMemorizationDays);
     this.tracker = new SurahProgressTracker(this.surahs);
   }
 
-  // generate Plan
-  generate(): PlanDay[] {
-    for (
-      let day = 0;
-      day < this.totalDays && this.totalAyahsMemorized < this.totalAyah;
-      day++
-    ) {
+  generate(): Plan {
+    let day = 0;
+    while (day < this.totalDays && this.totalAyahsMemorized < this.totalAyah) {
       const currentDay = new Date(this.startDate);
       currentDay.setDate(currentDay.getDate() + day);
       const dayName = this.DayOfWeek[day % 7];
 
-      const isReviewDay = this.generateReviewDays(day, currentDay);
-
-      if (!isReviewDay) {
-        const range = this.tracker.getNextAyahRenge(this.ayahPerDay);
-
-        if (range) {
-          const actualAyahsToday = Math.min(
-            this.ayahPerDay,
-            this.totalAyah - this.totalAyahsMemorized
-          );
-          this.totalAyahsMemorized += actualAyahsToday;
-
-          const plan: PlanDay = {
-            day: dayName as string,
-            from_surah: this.surahs[range.fromSurah]?.name ?? "غير معرف",
-            from_ayah: range.fromAyah,
-            to_surah: this.surahs[range.toSurah]?.name ?? "غير معرف",
-            to_ayah: range.toAyah,
-            review_type: "حفظ",
-            is_review: false,
-            date: currentDay,
-          };
-          this.planOfHifz.push(plan);
-          this.revisionManager.addRevision({ ...range, date: currentDay });
-        }
+      // التحقق من أيام المراجعة والإجازة
+      const reviewDaysUsed = this.generateReviewDays(day, currentDay);
+      if (reviewDaysUsed > 0) {
+        day += reviewDaysUsed;
+        continue;
       }
+
+      // إضافة يوم حفظ
+      const range = this.tracker.getNextAyahRange(this.ayahPerDay);
+      if (range) {
+        const actualAyahsToday = Math.min(
+          this.ayahPerDay,
+          this.totalAyah - this.totalAyahsMemorized
+        );
+        this.totalAyahsMemorized += actualAyahsToday;
+
+        const plan: PlanDay = {
+          day: dayName,
+          from_surah: this.surahs[range.fromSurah]?.name ?? "غير معرف",
+          from_ayah: range.fromAyah,
+          to_surah: this.surahs[range.toSurah]?.name ?? "غير معرف",
+          to_ayah: range.toAyah,
+          review_type: "حفظ",
+          is_review: false,
+          date: currentDay,
+        };
+        this.planOfHifz.push(plan);
+        this.revisionManager.addRevision({ ...range, date: currentDay });
+      }
+      day++;
     }
 
-    return this.planOfHifz;
+    return {
+      actualMemorizationDays: this.actualMemorizationDays,
+      plan: this.planOfHifz,
+      totalAyahPerDay: this.ayahPerDay,
+      totalDays: this.totalDays,
+      totalReviewDays: this.totalReviewDays,
+    };
   }
 
-  private generateReviewDays(day: number, currentDay: Date) {
+  private generateReviewDays(day: number, currentDay: Date): number {
     const addSingleReview = (
       chunk: RevisionType[],
       reviewType: string,
@@ -201,10 +192,10 @@ export class PlanGenerator {
       const first = chunk[0];
       const last = chunk[chunk.length - 1];
       this.planOfHifz.push({
-        day: this.DayOfWeek[(day + offset) % 7] || "غير معروف",
-        from_surah: this.surahs[first.fromSurah]?.name ?? "غير معروف",
+        day: this.DayOfWeek[(day + offset) % 7] || "غير معرف",
+        from_surah: this.surahs[first.fromSurah]?.name ?? "غير معرف",
         from_ayah: first.fromAyah,
-        to_surah: this.surahs[last.toSurah]?.name ?? "غير معروف",
+        to_surah: this.surahs[last.toSurah]?.name ?? "غير معرف",
         to_ayah: last.toAyah,
         review_type: reviewType,
         date: new Date(currentDay.getTime() + offset * 86400000),
@@ -212,6 +203,7 @@ export class PlanGenerator {
       });
     };
 
+    // مراجعة كل شهرين (6 أيام مراجعة + يوم إجازة)
     if (
       day > 0 &&
       day % 60 === 59 &&
@@ -222,50 +214,44 @@ export class PlanGenerator {
 
       for (let i = 0; i < 6; i++) {
         const chunk = all.slice(i * chunkSize, (i + 1) * chunkSize);
-        addSingleReview(chunk, `مراجعة الشهرين السابقين - الجزء ${i + 1}`, i);
+        addSingleReview(chunk, `مراجعة الشهرين السابقين`, i);
       }
 
-      this.planOfHifz.push({
-        day: this.DayOfWeek[(day + 6) % 7] || "غير معرف",
-        from_surah: "",
-        from_ayah: 0,
-        to_surah: "",
-        to_ayah: 0,
-        review_type: "إجازة",
-        date: new Date(currentDay.getTime() + 6 * 86400000),
-        is_review: true,
-      });
-
       this.revisionManager.clearTwoMonthly();
-      return true;
+      return 7; // 6 أيام مراجعة + يوم إجازة
     }
 
+    // مراجعة شهرية (يومان)
     if (
       day > 0 &&
       day % 30 === 29 &&
-      this.revisionManager.getTwoMonthly().length > 0
+      this.revisionManager.getMonthly().length > 0
     ) {
       const all = this.revisionManager.getMonthly();
       const chunkSize = Math.ceil(all.length / 2);
 
       for (let i = 0; i < 2; i++) {
-        const chunk = all.slice(i * chunkSize, i + 1 * chunkSize);
-        addSingleReview(chunk, `مراجعة الشهر السابق - الجزء ${i + 1}`, i);
+        const chunk = all.slice(i * chunkSize, (i + 1) * chunkSize);
+        addSingleReview(chunk, `مراجعة الشهر السابق`, i);
       }
 
       this.revisionManager.clearMonthly();
-      return true;
+      return 2; // يومان للمراجعة
     }
 
+    // مراجعة أسبوعية (يوم واحد)
     if (
       day > 0 &&
       day % 7 === 6 &&
-      this.revisionManager.getTwoMonthly().length > 0
+      this.revisionManager.getWeekly().length > 0
     ) {
       const all = this.revisionManager.getWeekly();
       addSingleReview(all, "مراجعة أسبوعية");
+
       this.revisionManager.clearWeekly();
-      return true;
+      return 1; // يوم واحد للمراجعة
     }
+
+    return 0; // لا مراجعة
   }
 }
