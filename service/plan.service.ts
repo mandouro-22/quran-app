@@ -111,6 +111,7 @@ export class PlanGenerator {
   private readonly revisionManager = new RevisionManager();
   private totalAyahsMemorized = 0;
   private totalReviewDays = 0;
+  private totalVacationDays = 0;
   private readonly planOfHifz: PlanDay[] = [];
 
   constructor(
@@ -124,17 +125,24 @@ export class PlanGenerator {
     this.totalDays = Math.floor(totalMonth * 30.42);
 
     const weeklyReviewDays = Math.floor(this.totalDays / 7);
+    const weeklyVacationDays = Math.floor(this.totalDays / 7);
     const monthlyReviewDays = Math.floor(this.totalDays / 30) * 2;
     const twoMonthlyReviewDays = Math.floor(this.totalDays / 60) * 7;
-
+    this.totalVacationDays = weeklyVacationDays;
     this.totalReviewDays =
       weeklyReviewDays + monthlyReviewDays + twoMonthlyReviewDays;
-    this.actualMemorizationDays = this.totalDays - this.totalReviewDays;
+    this.actualMemorizationDays =
+      this.totalDays - this.totalReviewDays - this.totalVacationDays;
     this.ayahPerDay = Math.ceil(this.totalAyah / this.actualMemorizationDays);
     this.tracker = new SurahProgressTracker(this.surahs);
   }
 
-  generate(): Plan {
+  getTotalVacationDays(): number {
+    return this.totalVacationDays;
+  }
+
+  async generate(): Promise<Plan> {
+    await new Promise((resolve) => setTimeout(resolve, 0));
     let day = 0;
     while (day < this.totalDays && this.totalAyahsMemorized < this.totalAyah) {
       const currentDay = new Date(this.startDate);
@@ -177,6 +185,7 @@ export class PlanGenerator {
       totalAyahPerDay: this.ayahPerDay,
       totalDays: this.totalDays,
       totalReviewDays: this.totalReviewDays,
+      totalVacationDays: this.totalVacationDays,
     };
   }
 
@@ -197,7 +206,7 @@ export class PlanGenerator {
         to_ayah: last.toAyah,
         review_type: reviewType,
         date: new Date(currentDay.getTime() + offset * 86400000),
-        is_review: true,
+        is_review: false,
       });
     };
 
@@ -213,9 +222,8 @@ export class PlanGenerator {
         const chunk = all.slice(i * chunkSize, (i + 1) * chunkSize);
         addSingleReview(chunk, `مراجعة الشهرين السابقين`, i);
       }
-
       this.revisionManager.clearTwoMonthly();
-      return 7;
+      return 6;
     }
 
     if (
@@ -242,9 +250,18 @@ export class PlanGenerator {
     ) {
       const all = this.revisionManager.getWeekly();
       addSingleReview(all, "مراجعة أسبوعية");
-
+      this.planOfHifz.push({
+        day: this.DayOfWeek[(day + 1) % 7] || "غير معرف",
+        from_surah: "",
+        from_ayah: 0,
+        to_surah: "",
+        to_ayah: 0,
+        review_type: "إجازة",
+        date: new Date(currentDay.getTime() + 1 * 86400000),
+        is_review: false,
+      });
       this.revisionManager.clearWeekly();
-      return 1;
+      return 2;
     }
 
     return 0;

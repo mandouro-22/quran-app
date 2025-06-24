@@ -3,6 +3,7 @@ import { Cairo } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { PlanProvider } from "@/context/plan";
+import { Toaster } from "react-hot-toast";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -52,6 +53,7 @@ export default function RootLayout({
             <main className="relative z-10">{children}</main>
           </ThemeProvider>
         </PlanProvider>
+        <Toaster position="bottom-center" reverseOrder={false} />
       </body>
     </html>
   );

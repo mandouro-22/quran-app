@@ -34,29 +34,31 @@ export default function PlanCard({ plan }: planType) {
       >
         {plan.review_type}
       </div>
-      <div className="flex items-center flex-wrap gap-2 5">
-        <div className="text-sm text-gray-700 dark:text-gray-300">
-          من سورة{" "}
-          <span className="font-bold dark:text-white text-gray-900">
-            {plan.from_surah}
-          </span>{" "}
-          الاية رقم{" "}
-          <span className="font-bold dark:text-white text-gray-900">
-            {formatDay(plan.from_ayah)}
-          </span>
+      {plan.review_type !== "إجازة" ? (
+        <div className="flex items-center flex-wrap gap-2.5">
+          <div className="text-sm text-gray-700 dark:text-gray-300">
+            من سورة{" "}
+            <span className="font-bold dark:text-white text-gray-900">
+              {plan.from_surah}
+            </span>{" "}
+            الاية رقم{" "}
+            <span className="font-bold dark:text-white text-gray-900">
+              {formatDay(plan.from_ayah)}
+            </span>
+          </div>
+          <span className="text-gray-700 dark:text-gray-300">-</span>
+          <div className="text-sm text-gray-700 dark:text-gray-300">
+            إلى سورة{" "}
+            <span className="font-bold dark:text-white text-gray-900">
+              {plan.to_surah}
+            </span>{" "}
+            الاية رقم{" "}
+            <span className="font-bold dark:text-white text-gray-900">
+              {formatDay(plan.to_ayah)}
+            </span>
+          </div>
         </div>
-        <span className="text-gray-700 dark:text-gray-300">-</span>
-        <div className="text-sm text-gray-700 dark:text-gray-300">
-          إلى سورة{" "}
-          <span className="font-bold dark:text-white text-gray-900">
-            {plan.to_surah}
-          </span>{" "}
-          الاية رقم{" "}
-          <span className="font-bold dark:text-white text-gray-900">
-            {formatDay(plan.to_ayah)}
-          </span>
-        </div>
-      </div>
+      ) : null}
     </div>
   );
 }

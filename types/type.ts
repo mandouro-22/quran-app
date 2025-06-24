@@ -1,4 +1,5 @@
 export interface PlanDay {
+  id?: string;
   day: string;
   from_surah: string;
   from_ayah: number;
@@ -14,6 +15,7 @@ export interface PlanStatsType {
   totalDays: number;
   totalReviewDays: number;
   actualMemorizationDays: number;
+  totalVacationDays: number;
 }
 
 export interface Plan {
@@ -22,4 +24,5 @@ export interface Plan {
   totalDays: number;
   totalReviewDays: number;
   actualMemorizationDays: number;
+  totalVacationDays: number;
 }

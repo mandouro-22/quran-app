@@ -1,0 +1,170 @@
+"use client";
+
+import { formatDay } from "@/lib/format/format-date";
+import { createClient } from "@/lib/supabase/client";
+import { PlanDay, PlanStatsType } from "@/types/type";
+import Link from "next/link";
+import toast from "react-hot-toast";
+import { useEffect, useState } from "react";
+
+interface DashboardProps {
+  planStats: PlanStatsType & {
+    id: string;
+    user_id: string;
+    created_at: string;
+  };
+}
+
+export default function Dashboard({ planStats }: DashboardProps) {
+  const supabase = createClient();
+  const [data, setData] = useState<PlanDay | null>(null);
+  const [numberOfDaysHifz, setNumberOfDaysHifz] = useState(0);
+
+  useEffect(() => {
+    const fetchTodayTask = async () => {
+      const today = new Date().toISOString().split("T")[0];
+      const { data, error } = await supabase
+        .from("plan_item")
+        .select("*")
+        .eq("plan_id", planStats.id)
+        .eq("user_id", planStats.user_id)
+        .eq("date", today)
+        .single();
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      const { data: numberDayOfHifz, error: errorDaysOfHifz } = await supabase
+        .from("plan_item")
+        .select("*")
+        .eq("plan_id", planStats.id)
+        .eq("user_id", planStats.user_id)
+        .eq("is_review", true);
+      if (errorDaysOfHifz) {
+        console.error(errorDaysOfHifz);
+        return;
+      }
+      setNumberOfDaysHifz(numberDayOfHifz.length);
+      setData(data);
+    };
+
+    fetchTodayTask();
+  }, [planStats, supabase]);
+
+  const handleUpdate = async (itemId: string) => {
+    const { data, error } = await supabase
+      .from("plan_item")
+      .update({ is_review: true })
+      .eq("id", itemId)
+      .eq("user_id", planStats.user_id)
+      .eq("plan_id", planStats.id)
+      .select("*")
+      .single();
+
+    if (error) {
+      console.error("خطأ في التحديث:", error);
+      toast.error(error.message, {
+        className: "dark:bg-[#333] dark:text-[#fff] rounded-[10px]",
+      });
+      return;
+    }
+    setData(data);
+    toast.success("تم التحديث بنجاح!", {
+      className: "dark:bg-[#333] dark:text-[#fff] rounded-[10px]",
+    });
+  };
+
+  if (!data) return;
+
+  return (
+    <div className="my-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="relative rounded-2xl overflow-hidden p-8 bg-gradient-to-t from-pink-700 via-purple-700 to-indigo-700">
+          <div className="absolute inset-0 backdrop-blur-[10px] blur-2xl bg-white/10 pointer-events-none z-10" />
+          <div className="relative z-10 flex flex-col items-start text-white space-y-2.5">
+            <h3 className="text-2xl font-semibold">الخطة الحالية</h3>
+            <h1 className="text-4xl font-extrabold">
+              ختــــــــــــم القـــــــــران
+            </h1>
+            <p className="mt-1 text-xl">
+              فى {formatDay(planStats.totalDays)} يـــــــــــــوم
+            </p>
+          </div>
+        </div>
+
+        <div className="relative rounded-2xl overflow-hidden p-8 bg-gradient-to-t via-orange-500 from-orange-600 to-orange-600">
+          <div className="absolute inset-0 backdrop-blur-[20px] bg-white/5 pointer-events-none z-10" />
+          <div className="relative z-10 flex flex-col items-start text-white space-y-2.5">
+            <h3 className="text-xl font-semibold">مهمة اليوم</h3>
+            <h1 className="text-3xl font-extrabold">{data.review_type}</h1>
+            <div className="flex items-center flex-wrap gap-2.5">
+              <div className="text-base text-gray-100">
+                من سورة{" "}
+                <span className="font-bold text-white">{data.from_surah}</span>{" "}
+                الاية رقم{" "}
+                <span className="font-bold text-white">
+                  {formatDay(data.from_ayah)}
+                </span>
+              </div>
+              <span className="text-gray-100">-</span>
+              <div className="text-base text-gray-100">
+                إلى سورة{" "}
+                <span className="font-bold text-white">{data.to_surah}</span>{" "}
+                الاية رقم{" "}
+                <span className="font-bold text-white">
+                  {formatDay(data.to_ayah)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {data.is_review !== false ? (
+            <div className="grid grid-cols-2 gap-2 relative z-10 mt-6">
+              <Link
+                href="/dashboard/home/surah"
+                className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center"
+              >
+                {data.review_type === "حفظ" ? "ابدأ الحفظ" : "ابدأ المراجعة"}
+              </Link>
+              {data.review_type !== "إجازة" && (
+                <button
+                  type="button"
+                  className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center"
+                  onClick={() => handleUpdate(data.id as string)}
+                >
+                  أنهيت المهمة
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-2 relative z-10 mt-6">
+              <p className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center">
+                لقد اتممت الحفظ بنجاح 🎉
+              </p>
+            </div>
+          )}
+        </div>
+        <div className="relative rounded-2xl overflow-hidden p-8 bg-gradient-to-t from-violet-700 via-purple-600 to-violet-700">
+          <div className="absolute inset-1 backdrop-blur-[20px] rounded-2xl bg-white/5 pointer-events-none z-10" />
+          <div className="relative z-10 flex flex-col items-start text-white space-y-2.5">
+            <h3 className="text-xl font-semibold">عدد الأيام المحفوظة</h3>
+            <h1 className="text-3xl font-extrabold">
+              {numberOfDaysHifz} {numberOfDaysHifz === 1 ? "يوم" : "أيام"}
+            </h1>
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full flex items-center my-6">
+        <Link
+          href={"/dashboard/dailylog"}
+          className="w-full flex items-center justify-center bg-purple-400/20 hover:bg-purple-500/30 dark:bg-white/20 dark:hover:bg-white/30 dark:text-white font-bold py-3 px-4 rounded-xl backdrop-blur-sm transition"
+        >
+          تابع سجلك اليومى
+        </Link>
+      </div>
+    </div>
+  );
+}

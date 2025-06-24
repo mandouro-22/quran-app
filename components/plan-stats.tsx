@@ -53,6 +53,10 @@ export default function PlanStats({
               {planData && planData.totalAyahPerDay > 10 ? "آيــه" : "آيــات"}
             </p>
           </div>
+          <div className="ml-4 inline-block py-2 px-4 md:py-4 md:px-8 text-white bg-gradient-to-t to-indigo-700/80 from-indigo-800/90 dark:to-indigo-700/30 dark:from-indigo-800/70 border-indigo-500 dark:border-indigo-600/40 shadow border-2 rounded-2xl  flex-col justify-center text-center w-fit">
+            <h1 className="text-lg font-semibold">عدد أيام الاجازة</h1>
+            <p>{planData ? formatDay(planData.totalVacationDays) : null} يوم</p>
+          </div>
         </div>
         <button
           type="button"
