@@ -18,7 +18,13 @@ interface DashboardProps {
 export default function Dashboard({ planStats }: DashboardProps) {
   const supabase = createClient();
   const [data, setData] = useState<PlanDay | null>(null);
-  const [numberOfDaysHifz, setNumberOfDaysHifz] = useState(0);
+  const [numberOfDaysHifz, setNumberOfDaysHifz] = useState<
+    DashboardProps[] | []
+  >([]);
+
+  const [reviewNumber, setReviewNumber] = useState<DashboardProps[] | []>([]);
+  console.log(reviewNumber);
+  console.log(numberOfDaysHifz);
 
   useEffect(() => {
     const fetchTodayTask = async () => {
@@ -46,7 +52,19 @@ export default function Dashboard({ planStats }: DashboardProps) {
         console.error(errorDaysOfHifz);
         return;
       }
-      setNumberOfDaysHifz(numberDayOfHifz.length);
+
+      const hifzLength = numberDayOfHifz.filter(
+        (item) => item.review_type === "حفظ"
+      );
+      const reviewLength = numberDayOfHifz.filter(
+        (item) =>
+          item.review_type === "مراجعة أسبوعية" ||
+          item.review_type === "مراجعة الشهر السابق" ||
+          item.review_type === "مراجعة الشهرين السابقين"
+      );
+      setNumberOfDaysHifz(hifzLength);
+      setReviewNumber(reviewLength);
+
       setData(data);
     };
 
@@ -120,10 +138,10 @@ export default function Dashboard({ planStats }: DashboardProps) {
             </div>
           </div>
 
-          {data.is_review !== false ? (
+          {data.is_review === false ? (
             <div className="grid grid-cols-2 gap-2 relative z-10 mt-6">
               <Link
-                href="/dashboard/home/surah"
+                href={`/dashboard/home/surah/${data.id}`}
                 className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center"
               >
                 {data.review_type === "حفظ" ? "ابدأ الحفظ" : "ابدأ المراجعة"}
@@ -149,9 +167,21 @@ export default function Dashboard({ planStats }: DashboardProps) {
         <div className="relative rounded-2xl overflow-hidden p-8 bg-gradient-to-t from-violet-700 via-purple-600 to-violet-700">
           <div className="absolute inset-1 backdrop-blur-[20px] rounded-2xl bg-white/5 pointer-events-none z-10" />
           <div className="relative z-10 flex flex-col items-start text-white space-y-2.5">
-            <h3 className="text-xl font-semibold">عدد الأيام المحفوظة</h3>
+            <h3 className="text-xl font-semibold">عدد الايام التى تم حفظها</h3>
             <h1 className="text-3xl font-extrabold">
-              {numberOfDaysHifz} {numberOfDaysHifz === 1 ? "يوم" : "أيام"}
+              {numberOfDaysHifz.length ?? 0}{" "}
+              {numberOfDaysHifz.length === 1 ? "يوم" : "أيام"}
+            </h1>
+          </div>
+        </div>
+        <div className="relative rounded-2xl overflow-hidden p-8 bg-gradient-to-t from-violet-700 via-purple-600 to-violet-700">
+          <div className="absolute inset-1 backdrop-blur-[20px] rounded-2xl bg-white/5 pointer-events-none z-10" />
+          <div className="relative z-10 flex flex-col items-start text-white space-y-2.5">
+            <h3 className="text-xl font-semibold">
+              عدد الايام التى تم مراجعتها
+            </h3>
+            <h1 className="text-3xl font-extrabold">
+              {reviewNumber.length ?? 0}
             </h1>
           </div>
         </div>

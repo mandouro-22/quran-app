@@ -1,7 +1,7 @@
+@import url("https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Cairo&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -65,4 +65,8 @@
   body {
     @apply relative min-h-screen  bg-white dark:bg-[#0f0c29] transition-colors;
   }
+}
+
+.font-amiri {
+  font-family: "Amiri", serif;
 }
