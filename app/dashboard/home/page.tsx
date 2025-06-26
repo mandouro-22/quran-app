@@ -1,6 +1,7 @@
 import Dashboard from "@/components/dashboard";
 import { formatHijriDate } from "@/lib/format/format-date";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 // import { PlanStatsType } from "@/types/type";
 import React from "react";
 
@@ -19,7 +20,11 @@ export default async function Home() {
     .eq("user_id", user?.user?.id)
     .single();
 
-  if (error) return;
+  if (error && !data) {
+    console.error(error.message);
+    return redirect("/dashboard/generate-plan");
+  }
+
   return (
     <section className="sm:py-8">
       <div className="max-w-screen-xl mx-auto">

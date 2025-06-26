@@ -6,14 +6,14 @@ interface PlanStats {
   plan: PlanDay[];
   planData: PlanStatsType | null;
   loading: boolean;
-  handleSubmit: () => void;
+  handleCheckPlanExists: () => Promise<void>;
 }
 
 export default function PlanStats({
   plan,
   planData,
   loading,
-  handleSubmit,
+  handleCheckPlanExists,
 }: PlanStats) {
   return (
     <div className="">
@@ -61,9 +61,8 @@ export default function PlanStats({
         <button
           type="button"
           className="ml-4 mt-4 inline-block py-2 px-4 md:py-4 md:px-8 bg-gradient-to-t to-orange-400 from-orange-500  shadow border-2 border-orange-400 rounded-2xl  flex-col justify-center text-center w-fit text-white"
-          onClick={handleSubmit}
-          disabled={loading}
-        >
+          onClick={handleCheckPlanExists}
+          disabled={loading}>
           تسجيل خريطه الحفظ
         </button>
       </div>

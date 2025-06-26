@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import GeneratePlan from "@/components/plan-generate";
 
 export default async function ProtectedPage() {
   const supabase = await createClient();
@@ -9,9 +8,11 @@ export default async function ProtectedPage() {
     redirect("/auth/login");
   }
 
-  return (
-    <div className="flex-1 w-full flex flex-col gap-12">
-      <GeneratePlan userId={data.user.id as string} />
-    </div>
-  );
+  const { data: plan, error: errPlan } = await supabase
+    .from("plan")
+    .select("id")
+    .eq("user_id", data.user.id);
+  if (errPlan) throw errPlan;
+  if (plan) redirect("/dashboard/home");
+  redirect("/dashboard/generate-plan");
 }

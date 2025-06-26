@@ -48,8 +48,7 @@ export default function RootLayout({
             attribute="class"
             defaultTheme="system"
             enableSystem
-            disableTransitionOnChange
-          >
+            disableTransitionOnChange>
             <main className="relative z-10">{children}</main>
           </ThemeProvider>
         </PlanProvider>

@@ -4,7 +4,7 @@ import { getActiviteType } from "@/components/plan-card";
 import { formatDate, formatDay } from "@/lib/format/format-date";
 import { createClient } from "@/lib/supabase/client";
 import { PlanDay } from "@/types/type";
-import { Check, LoaderCircle } from "lucide-react";
+import { Check } from "lucide-react";
 import React from "react";
 
 interface DailyLog {
@@ -16,12 +16,12 @@ interface DailyLog {
 export default function DailyLog() {
   const [totalDays, setTotalDays] = React.useState<number>(0);
   const [plan, setPlan] = React.useState<PlanDay[] | null>();
-  const [loading, setLoading] = React.useState(true);
+  // const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
     const handleGetAllPlan = async () => {
       try {
-        setLoading(true);
+        // setLoading(true);
         const supabase = createClient();
 
         const user = await supabase.auth.getUser();
@@ -57,22 +57,11 @@ export default function DailyLog() {
         console.log(data);
       } catch (error) {
         console.error(error);
-      } finally {
-        setLoading(false);
       }
     };
 
     handleGetAllPlan();
   }, []);
-
-  if (loading) {
-    <div className="flex items-center justify-center">
-      <LoaderCircle
-        size={30}
-        className="animate-spin transition-all duration-1000"
-      />
-    </div>;
-  }
 
   return (
     <section className="sm:py-8">
@@ -95,8 +84,7 @@ export default function DailyLog() {
             plan.map((item) => (
               <div
                 key={item.id}
-                className="space-y-2 border border-gray-200 dark:border-gray-800/40 shadow p-2 rounded-lg relative"
-              >
+                className="space-y-2 border border-gray-200 dark:border-gray-800/40 shadow p-2 rounded-lg relative">
                 {item.is_review ? (
                   <div className="absolute left-2 top-2 bg-gradient-to-t to-green-400 from-green-700 w-6 h-6 rounded-full flex items-center justify-center mr-auto">
                     <Check size={18} className="text-white" />
@@ -108,8 +96,7 @@ export default function DailyLog() {
                 <div
                   className={`font-medium text-white border-2 bg-gradient-to-t text-sm ${getActiviteType(
                     item.review_type
-                  )} w-fit px-4 py-1 rounded-lg`}
-                >
+                  )} w-fit px-4 py-1 rounded-lg`}>
                   {item.review_type}
                 </div>
                 {item.review_type !== "إجازة" ? (

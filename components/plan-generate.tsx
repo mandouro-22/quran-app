@@ -1,18 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { Label } from "./ui/label";
 import { usePlan } from "@/context/plan";
 import { PlanGenerator } from "@/service/plan.service";
 import PlanStats from "./plan-stats";
 import PlanCard from "./plan-card";
-import { Loader, LoaderCircle } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { v4 as uuidv4 } from "uuid";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import DeletePlanModel from "./delete-plan-model";
+import FromGeneratePlan from "./form-generate-plan";
 
 interface planOfHifz {
   day: string;
@@ -44,6 +43,8 @@ export default function GeneratePlan({ userId }: GeneratePlanProps) {
 
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showModel, setShowModel] = useState<boolean>(false);
+  const [planId, setPlanId] = useState<string | null>(null);
 
   const totalSurahAndAyah = usePlan();
   const surahAndAyah = totalSurahAndAyah?.surahAndAyah;
@@ -95,6 +96,29 @@ export default function GeneratePlan({ userId }: GeneratePlanProps) {
       ...prev,
       [name]: parseInt(value) || 0,
     }));
+  };
+
+  const handleCheckPlanExists = async () => {
+    const supabase = createClient();
+    const { data: plan, error: errPlan } = await supabase
+      .from("plan")
+      .select("id")
+      .eq("user_id", userId);
+    if (errPlan) {
+      console.error(errPlan.message);
+      toast.error(errPlan.message, {
+        className: "dark:bg-[#333] dark:text-[#fff] rounded-[10px]",
+      });
+      return;
+    }
+
+    if (plan && plan.length > 0) {
+      setPlanId(plan[0].id);
+      setShowModel(true);
+      return;
+    }
+
+    await handleSubmit();
   };
 
   const handleSubmit = async () => {
@@ -168,93 +192,71 @@ export default function GeneratePlan({ userId }: GeneratePlanProps) {
   };
 
   return (
-    <div className="flex-1 w-full flex flex-col gap-12">
-      <form onSubmit={handleGeneratePlan} className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="w-full space-y-2">
-            <Label className="text-base font-medium mb-1.5">عدد السنين</Label>
-            <Input
-              type="number"
-              name="years"
-              placeholder="type of years"
-              value={formData.years}
-              onChange={handleInputChange}
-              min={1}
-            />
-          </div>
-          <div className="w-full space-y-2">
-            <Label className="text-base font-medium mb-1.5">عدد الشهور</Label>
-            <Input
-              type="number"
-              name="month"
-              placeholder="type of month"
-              value={formData.month}
-              onChange={handleInputChange}
-            />
-          </div>
-        </div>
-        <div className="flex items-center justify-center">
-          <Button
-            disabled={loading || pending}
-            type="submit"
-            className="font-medium text-base flex items-center justify-center"
-          >
-            {pending ? (
-              <Loader className="animate-spin transition-all duration-150" />
-            ) : (
-              "انشاء الخطه"
-            )}
-          </Button>
-        </div>
-      </form>
+    <>
+      {showModel ? (
+        <DeletePlanModel
+          planId={planId!}
+          setShowModel={setShowModel}
+          handleGeneratePlan={handleSubmit}
+        />
+      ) : null}
 
-      {pending ? (
-        <div className="flex items-center justify-center">
-          <LoaderCircle
-            size={60}
-            className="animate-spin transition-all duration-1000"
-          />
-        </div>
-      ) : (
-        <>
-          {plan && planData && plan.length > 0 ? (
-            <PlanStats
-              handleSubmit={handleSubmit}
-              loading={loading}
-              plan={plan}
-              planData={planData}
-            />
-          ) : null}
+      <div className="flex-1 w-full flex flex-col gap-12">
+        <FromGeneratePlan
+          handleGeneratePlan={handleGeneratePlan}
+          formData={formData}
+          handleInputChange={handleInputChange}
+          loading={loading}
+          pending={pending}
+        />
 
-          <div
-            className={`${
-              plan && plan.length > 0
-                ? "dark:border-purple-200/5 border-purple-200/30 border-2"
-                : null
-            }  rounded-md px-4 py-6`}
-          >
-            {plan ? (
-              <div>
-                {plan && plan.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 my-3">
-                    {plan.map((item, index) => (
-                      <PlanCard plan={item} key={index} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-lg font-medium text-center">
-                    لا يوجد خطه للحفظ
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="text-lg font-medium text-center">
-                لا يوجد خطه للحفظ
-              </div>
-            )}
+        {pending ? (
+          <div className="flex items-center justify-center">
+            <LoaderCircle
+              size={60}
+              className="animate-spin transition-all duration-1000"
+            />
           </div>
-        </>
-      )}
-    </div>
+        ) : (
+          <>
+            {plan && planData && plan.length > 0 ? (
+              <PlanStats
+                handleCheckPlanExists={handleCheckPlanExists}
+                loading={loading}
+                plan={plan}
+                planData={planData}
+              />
+            ) : null}
+
+            <div
+              className={`${
+                plan && plan.length > 0
+                  ? "dark:border-purple-200/5 border-purple-200/30 border-2"
+                  : null
+              }  rounded-md px-4 py-6`}>
+              {plan ? (
+                <div>
+                  {plan && plan.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 my-3">
+                      {plan.map((item, index) => (
+                        <PlanCard plan={item} key={index} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-lg font-medium text-center">
+                      لا يوجد خطه للحفظ
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-lg font-medium text-center">
+                  لا يوجد خطه للحفظ
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </>
   );
 }
