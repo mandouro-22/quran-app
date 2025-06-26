@@ -10,12 +10,14 @@ export default function ProtectedLayout({
 }) {
   return (
     <main className="min-h-screen flex flex-col items-center">
-      <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
+      <nav className="w-full flex justify-center items-center border-b border-b-foreground/10 h-16">
         <div className="w-full container flex justify-between items-center p-3 px-5 text-sm">
-          <div className="!flex-1 w-full">
+          <div className="!sm:flex-grow w-full">
             <Nav />
           </div>
-          {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
+          <div className="max-sm:!flex-grow max-sm:!w-full">
+            {!hasEnvVars ? <EnvVarWarning /> : <AuthButton />}
+          </div>
         </div>
       </nav>
       <div className="flex-1 flex flex-col gap-20 container p-5">
