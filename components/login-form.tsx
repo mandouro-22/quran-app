@@ -74,19 +74,18 @@ export default memo(function LoginForm() {
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "جارى تسجيل الدخول..." : "تسجيل الدخول"}
               </Button>
-              <Link
+              {/* <Link
                 href="/auth/forgot-password"
                 className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
               >
                 هل نسيت كلمه السر؟
-              </Link>
+              </Link> */}
             </div>
             <div className="mt-4 text-center text-sm">
               ليس لديك حساب؟{" "}
               <Link
                 href="/auth/sign-up"
-                className="underline underline-offset-4"
-              >
+                className="underline underline-offset-4">
                 انشاء حساب
               </Link>
             </div>
