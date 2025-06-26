@@ -6,7 +6,7 @@ const navLinks = [
   { name: "اٍنشاء خطه", href: "/dashboard/generate-plan" },
 ];
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
@@ -15,6 +15,18 @@ import { ThemeSwitcher } from "./theme-switcher";
 export function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 638) {
+        setOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <>
@@ -44,9 +56,9 @@ export function Nav() {
           className="fixed left-0 top-0 right-0 bottom-0 w-full h-full bg-black/40 z-30 backdrop-blur-sm overflow-hidden"
           onClick={() => setOpen(false)}
         >
-          <div className="absolute right-0 top-0 h-full w-[40%] bg-gradient-to-b dark:from-purple-900/30 dark:to-purple-700/50 from-purple-900/10 to-purple-700/15 z-30" />
+          <div className="absolute right-0 top-0 h-full w-[60%] bg-gradient-to-b dark:from-purple-900/30 dark:to-purple-700/50 from-purple-900/10 to-purple-700/15 z-30" />
           <div
-            className="absolute right-0 top-0 h-full w-[40%] backdrop-blur-md shadow-xl flex flex-col space-y-4 z-40"
+            className="absolute right-0 top-0 h-full w-[60%] backdrop-blur-md shadow-xl flex flex-col space-y-4 z-40"
             onClick={(e) => e.stopPropagation()}
           >
             {/* from-purple-900 to-purple-500 */}
