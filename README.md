@@ -18,8 +18,12 @@ A web application that helps users create personalized plans to memorize the Qur
   - Authentication
   - Realtime PostgreSQL Database
   - Storage (for optional media or file support)
+ 
 
-## ![📸 Screenshots]("./quran-app.png")
+## 📸 Screenshots
+
+![Dashboard Preview](./quran-app.png)
+
 
 ## 🚀 Getting Started
 
