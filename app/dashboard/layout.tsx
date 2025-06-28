@@ -2,7 +2,7 @@ import { EnvVarWarning } from "@/components/env-var-warning";
 import { AuthButton } from "@/components/auth-button";
 import { hasEnvVars } from "@/lib/utils";
 import { Nav } from "@/components/nav";
-import Link from "next/link";
+// import Link from "next/link";
 
 export default function ProtectedLayout({
   children,
@@ -25,14 +25,14 @@ export default function ProtectedLayout({
         {children}
       </div>
 
-      <div className="flex items-center justify-end my-6 container mx-5 p-5">
+      {/* <div className="flex items-center justify-end my-6 container mx-5 p-5">
         <Link
           href={"/chat-box"}
           className="bg-purple-500  dark:bg-purple-700 hover:bg-purple-600 py-2.5 px-6 rounded-md text-white"
         >
           أستخدم الذكاء الأصطناعى فى اٍنشاء الخطة
         </Link>
-      </div>
+      </div> */}
     </main>
   );
 }
