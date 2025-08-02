@@ -22,7 +22,7 @@ A web application that helps users create personalized plans to memorize the Qur
 
 ## 📸 Screenshots
 
-![Dashboard Preview](./quran-app.png)
+![Logo](./قراَنى.png)
 
 
 ## 🚀 Getting Started
