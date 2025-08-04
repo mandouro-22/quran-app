@@ -1,11 +1,12 @@
 "use client";
 
+import React from "react";
 import { getActiviteType } from "@/components/plan-card";
 import { formatDate, formatDay } from "@/lib/format/format-date";
 import { createClient } from "@/lib/supabase/client";
 import { PlanDay } from "@/types/type";
 import { Check } from "lucide-react";
-import React from "react";
+import { motion } from "motion/react";
 
 interface DailyLog {
   id: string;
@@ -16,12 +17,21 @@ interface DailyLog {
 export default function DailyLog() {
   const [totalDays, setTotalDays] = React.useState<number>(0);
   const [plan, setPlan] = React.useState<PlanDay[] | null>();
-  // const [loading, setLoading] = React.useState(true);
+
+  const visible = {
+    opacity: 1,
+    y: 0,
+  };
+  const initial = "hidden";
+  const animate = "visible";
+
+  const limit_items = 20;
+  const page = 1;
+  const offset = (page - 1) * limit_items;
 
   React.useEffect(() => {
     const handleGetAllPlan = async () => {
       try {
-        // setLoading(true);
         const supabase = createClient();
 
         const user = await supabase.auth.getUser();
@@ -44,7 +54,9 @@ export default function DailyLog() {
           .select("*", { count: "exact" })
           .eq("user_id", user.data.user.id)
           .eq("plan_id", planId.id)
-          .order("date", { ascending: true });
+          .order("date", { ascending: true })
+          .limit(limit_items)
+          .range(offset, offset + limit_items - 1);
 
         if (error) {
           throw new Error(error.message);
@@ -61,12 +73,28 @@ export default function DailyLog() {
     };
 
     handleGetAllPlan();
-  }, []);
+  }, [offset, limit_items]);
 
   return (
     <section className="sm:py-8">
       <div className="max-w-screen-xl mx-auto">
-        <div className="space-y-6">
+        <motion.div
+          initial={initial}
+          animate={animate}
+          variants={{
+            hidden: {
+              opacity: 0,
+              y: 100,
+            },
+            visible: {
+              opacity: 1,
+              y: 0,
+            },
+          }}
+          transition={{
+            duration: 1,
+          }}
+          className="space-y-6">
           <h1 className="text-3xl md:text-5xl font-extrabold text-gray-800 dark:text-white">
             السجل
           </h1>
@@ -77,12 +105,25 @@ export default function DailyLog() {
             </span>{" "}
             يوم
           </h3>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 my-3">
           {plan && plan.length > 0 ? (
             plan.map((item) => (
-              <div
+              <motion.div
+                initial={initial}
+                animate={animate}
+                variants={{
+                  hidden: {
+                    opacity: 0,
+                    y: -50,
+                  },
+                  visible: visible,
+                }}
+                transition={{
+                  duration: 1,
+                  ease: "easeInOut",
+                }}
                 key={item.id}
                 className="space-y-2 border border-gray-200 dark:border-gray-800/40 shadow p-2 rounded-lg relative">
                 {item.is_review ? (
@@ -124,10 +165,27 @@ export default function DailyLog() {
                     </div>
                   </div>
                 ) : null}
-              </div>
+              </motion.div>
             ))
           ) : (
-            <div className="">لم تقم بتسجيل الخطه من الاساس</div>
+            <motion.div
+              initial={initial}
+              animate={animate}
+              variants={{
+                hidden: {
+                  opacity: 0,
+                  y: 100,
+                },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                },
+              }}
+              transition={{
+                duration: 1,
+              }}>
+              لم تقم بتسجيل الخطه من الاساس
+            </motion.div>
           )}
         </div>
       </div>
