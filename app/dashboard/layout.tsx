@@ -28,8 +28,7 @@ export default function ProtectedLayout({
       {/* <div className="flex items-center justify-end my-6 container mx-5 p-5">
         <Link
           href={"/chat-box"}
-          className="bg-purple-500  dark:bg-purple-700 hover:bg-purple-600 py-2.5 px-6 rounded-md text-white"
-        >
+          className="bg-purple-500  dark:bg-purple-700 hover:bg-purple-600 py-2.5 px-6 rounded-md text-white cursor-pointer hover:scale-x-110 duration-200 transition-all">
           أستخدم الذكاء الأصطناعى فى اٍنشاء الخطة
         </Link>
       </div> */}
