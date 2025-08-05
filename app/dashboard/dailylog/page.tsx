@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { PlanDay } from "@/types/type";
 import { Check } from "lucide-react";
 import { motion } from "motion/react";
+import Pagination from "@/components/pagination";
 
 interface DailyLog {
   id: string;
@@ -15,8 +16,17 @@ interface DailyLog {
 }
 
 export default function DailyLog() {
-  const [totalDays, setTotalDays] = React.useState<number>(0);
   const [plan, setPlan] = React.useState<PlanDay[] | null>();
+  const [count, setCount] = React.useState<number | null>(null);
+  const [pagination, setpagintaion] = React.useState<{
+    totalPage: number;
+    currentPage: number;
+    pageSize: number;
+  }>({
+    totalPage: 0,
+    currentPage: 1,
+    pageSize: 20,
+  });
 
   const visible = {
     opacity: 1,
@@ -25,10 +35,7 @@ export default function DailyLog() {
   const initial = "hidden";
   const animate = "visible";
 
-  const limit_items = 20;
-  const page = 1;
-  const offset = (page - 1) * limit_items;
-
+  const offset = (pagination.currentPage - 1) * pagination.pageSize;
   React.useEffect(() => {
     const handleGetAllPlan = async () => {
       try {
@@ -49,32 +56,30 @@ export default function DailyLog() {
           throw new Error(errPlan.message);
         }
 
-        const { data, error } = await supabase
+        const { data, error, count } = await supabase
           .from("plan_item")
           .select("*", { count: "exact" })
           .eq("user_id", user.data.user.id)
           .eq("plan_id", planId.id)
           .order("date", { ascending: true })
-          .limit(limit_items)
-          .range(offset, offset + limit_items - 1);
+          .limit(pagination.pageSize)
+          .range(offset, offset + pagination.pageSize - 1);
 
         if (error) {
           throw new Error(error.message);
         }
 
-        setTotalDays(data.length);
-
+        const calc = Math.ceil((count ?? 0) / pagination.pageSize);
+        setpagintaion((prev) => ({ ...prev, totalPage: calc }));
+        setCount(count);
         setPlan(data);
-
-        console.log(data);
       } catch (error) {
         console.error(error);
       }
     };
 
     handleGetAllPlan();
-  }, [offset, limit_items]);
-
+  }, [offset, pagination.pageSize]);
   return (
     <section className="sm:py-8">
       <div className="max-w-screen-xl mx-auto">
@@ -84,12 +89,9 @@ export default function DailyLog() {
           variants={{
             hidden: {
               opacity: 0,
-              y: 100,
+              y: -100,
             },
-            visible: {
-              opacity: 1,
-              y: 0,
-            },
+            visible: visible,
           }}
           transition={{
             duration: 1,
@@ -101,7 +103,7 @@ export default function DailyLog() {
           <h3 className="text-2xl md:text-3xl font-bold text-gray-700 dark:text-gray-200">
             لخطة التحفيظ القـــــــــران الكريم خلال{" "}
             <span className="underline decoration-purple-400 decoration-slice decoration-4 text-gray-900 dark:text-white">
-              {totalDays}
+              {formatDay(count!)}
             </span>{" "}
             يوم
           </h3>
@@ -189,6 +191,10 @@ export default function DailyLog() {
           )}
         </div>
       </div>
+      {/* TODO: Make pagination component */}
+      {plan ? (
+        <Pagination pagination={pagination} setpagintaion={setpagintaion} />
+      ) : null}
     </section>
   );
 }

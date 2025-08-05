@@ -9,6 +9,7 @@ import React from "react";
 import { Card, CardContent } from "./ui/card";
 import { formatDay } from "@/lib/format/format-date";
 import toast from "react-hot-toast";
+import { motion } from "motion/react";
 
 type AyahType = {
   numberInSurah: number;
@@ -177,16 +178,51 @@ export default function SurahCom() {
     }
   };
 
+  const visible = {
+    opacity: 1,
+    y: 0,
+  };
+  const initial = "hidden";
+  const animate = "visible";
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       <div className="relative z-10 py-8 sm:px-6 md:px-8 max-w-5xl mx-auto font-amiri">
-        <div className="mb-12">
+        <motion.div
+          initial={initial}
+          animate={animate}
+          variants={{
+            hidden: {
+              opacity: 0,
+              y: -50,
+            },
+            visible: visible,
+          }}
+          transition={{
+            duration: 1,
+          }}
+          className="mb-12">
           <h1 className="text-6xl font-extrabold">حفظ الورد اليومى</h1>
-        </div>
+        </motion.div>
 
         <div className="space-y-12">
           {surahAndAyah?.map((surah, i) => (
-            <div key={i} className="group relative">
+            <motion.div
+              initial={initial}
+              animate={animate}
+              variants={{
+                hidden: {
+                  opacity: 0,
+                  y: -50,
+                },
+                visible: visible,
+              }}
+              transition={{
+                duration: 0.5,
+                ease: "easeOut",
+              }}
+              key={i}
+              className="group relative">
               <div className="absolute -inset-1 bg-purple-300/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 dark:bg-gradient-to-r dark:from-violet-400/20 dark:via-indigo-400/20 dark:to-violet-400/20" />
 
               <Card className="relative overflow-hidden border bg-white text-gray-800 border-purple-200 dark:border-violet-400/20 dark:bg-gradient-to-br dark:from-slate-900/90 dark:via-indigo-900/90 dark:to-purple-900/90 dark:text-violet-100 shadow-2xl backdrop-blur-xl">
@@ -220,8 +256,7 @@ export default function SurahCom() {
                   {surah.ayahs.map((ayah, j) => (
                     <div
                       key={`${surah.surahOfNumber}-${ayah.numberInSurah}`}
-                      className="group/ayah relative hover:bg-purple-50 transition-all duration-500 dark:hover:bg-gradient-to-r dark:hover:from-indigo-950/30 dark:hover:via-violet-950/30 dark:hover:to-indigo-950/30"
-                    >
+                      className="group/ayah relative hover:bg-purple-50 transition-all duration-500 dark:hover:bg-gradient-to-r dark:hover:from-indigo-950/30 dark:hover:via-violet-950/30 dark:hover:to-indigo-950/30">
                       {j > 0 && (
                         <div className="absolute top-0 left-8 right-8 h-px bg-purple-200 dark:bg-gradient-to-r dark:from-transparent dark:via-violet-400/30 dark:to-transparent" />
                       )}
@@ -250,24 +285,25 @@ export default function SurahCom() {
                   ))}
                 </CardContent>
               </Card>
-            </div>
+            </motion.div>
           ))}
         </div>
 
-        <div className="mt-4 flex items-center justify-end">
-          <button
-            type="button"
-            className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center"
-            onClick={() => handleUpdate()}
-            disabled={loading}
-          >
-            {loading ? (
-              <Loader className="animate-spin transition-all duration-150" />
-            ) : (
-              "تأكيد إتمام الحفظ"
-            )}
-          </button>
-        </div>
+        {surahAndAyah ? (
+          <div className="mt-4 flex items-center justify-end">
+            <button
+              type="button"
+              className="col-span-1 bg-gradient-to-tr from-indigo-400 to-indigo-600 via-purple-500 dark:from-indigo-500 dark:to-indigo-700 dark:via-purple-600 hover:opacity-90 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center"
+              onClick={() => handleUpdate()}
+              disabled={loading}>
+              {loading ? (
+                <Loader className="animate-spin transition-all duration-150" />
+              ) : (
+                "تأكيد إتمام الحفظ"
+              )}
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
   );

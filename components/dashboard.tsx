@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { PlanDay, PlanStatsType } from "@/types/type";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "motion/react";
 
 interface DashboardProps {
@@ -19,6 +19,8 @@ interface DashboardProps {
 export default function Dashboard({ planStats }: DashboardProps) {
   const supabase = createClient();
   const [data, setData] = useState<PlanDay | null>(null);
+  const [review, setReview] = useState<{ is_review: boolean }[] | null>(null);
+  const [count, setCount] = useState<number | null>(null);
   const [numberOfDaysHifz, setNumberOfDaysHifz] = useState<
     DashboardProps[] | []
   >([]);
@@ -39,10 +41,9 @@ export default function Dashboard({ planStats }: DashboardProps) {
         console.error(error);
         return;
       }
-
       const { data: numberDayOfHifz, error: errorDaysOfHifz } = await supabase
         .from("plan_item")
-        .select("*")
+        .select("*", { count: "exact" })
         .eq("plan_id", planStats.id)
         .eq("user_id", planStats.user_id)
         .eq("is_review", true);
@@ -50,7 +51,22 @@ export default function Dashboard({ planStats }: DashboardProps) {
         console.error(errorDaysOfHifz);
         return;
       }
+      const {
+        data: totalReviewAndDays,
+        error: errReview,
+        count,
+      } = await supabase
+        .from("plan_item")
+        .select("is_review", { count: "exact" })
+        .eq("plan_id", planStats.id)
+        .eq("user_id", planStats.user_id);
+      if (errReview) {
+        console.error(errorDaysOfHifz);
+        return;
+      }
 
+      setReview(totalReviewAndDays);
+      setCount(count);
       const hifzLength = numberDayOfHifz.filter(
         (item) => item.review_type === "حفظ"
       );
@@ -91,6 +107,12 @@ export default function Dashboard({ planStats }: DashboardProps) {
       className: "dark:bg-[#333] dark:text-[#fff] rounded-[10px]",
     });
   };
+
+  const AllTaskReviewed = useCallback(() => {
+    if (!review) return;
+    const filter = review.filter((item) => item.is_review === true);
+    return filter.length;
+  }, [review]);
 
   const transition = {
     duration: 1,
@@ -145,52 +167,67 @@ export default function Dashboard({ planStats }: DashboardProps) {
           className="relative rounded-2xl overflow-hidden p-8 bg-gradient-to-t via-orange-500 from-orange-600 to-orange-600">
           <div className="absolute inset-0 backdrop-blur-[20px] bg-white/5 pointer-events-none z-10" />
           <div className="relative z-10 flex flex-col items-start text-white space-y-2.5">
-            <h3 className="text-xl font-semibold">مهمة اليوم</h3>
-            <h1 className="text-3xl font-extrabold">{data.review_type}</h1>
-            <div className="flex items-center flex-wrap gap-2.5">
-              <div className="text-base text-gray-100">
-                من سورة{" "}
-                <span className="font-bold text-white">{data.from_surah}</span>{" "}
-                الاية رقم{" "}
-                <span className="font-bold text-white">
-                  {formatDay(data.from_ayah)}
-                </span>
+            {AllTaskReviewed() !== count ? (
+              <>
+                <h3 className="text-xl font-semibold">مهمة اليوم</h3>
+                <h1 className="text-3xl font-extrabold">{data.review_type}</h1>
+                <div className="flex items-center flex-wrap gap-2.5">
+                  <div className="text-base text-gray-100">
+                    من سورة{" "}
+                    <span className="font-bold text-white">
+                      {data.from_surah}
+                    </span>{" "}
+                    الاية رقم{" "}
+                    <span className="font-bold text-white">
+                      {formatDay(data.from_ayah)}
+                    </span>
+                  </div>
+                  <span className="text-gray-100">-</span>
+                  <div className="text-base text-gray-100">
+                    إلى سورة{" "}
+                    <span className="font-bold text-white">
+                      {data.to_surah}
+                    </span>{" "}
+                    الاية رقم{" "}
+                    <span className="font-bold text-white">
+                      {formatDay(data.to_ayah)}
+                    </span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="text-white font-bold text-xl text-center mt-6">
+                <span className="text-3xl">🎯</span> كل المهام تمت بنجاح، بارك
+                الله فيك!
               </div>
-              <span className="text-gray-100">-</span>
-              <div className="text-base text-gray-100">
-                إلى سورة{" "}
-                <span className="font-bold text-white">{data.to_surah}</span>{" "}
-                الاية رقم{" "}
-                <span className="font-bold text-white">
-                  {formatDay(data.to_ayah)}
-                </span>
-              </div>
-            </div>
+            )}
           </div>
 
-          {data.is_review === false ? (
-            <div className="grid grid-cols-2 gap-2 relative z-10 mt-6">
-              <Link
-                href={`/dashboard/home/surah/${data.id}`}
-                className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center">
-                {data.review_type === "حفظ" ? "ابدأ الحفظ" : "ابدأ المراجعة"}
-              </Link>
-              {data.review_type !== "إجازة" && (
-                <button
-                  type="button"
-                  className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center"
-                  onClick={() => handleUpdate(data.id as string)}>
-                  أنهيت المهمة
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-2 relative z-10 mt-6">
-              <p className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center">
-                لقد اتممت الحفظ بنجاح 🎉
-              </p>
-            </div>
-          )}
+          {AllTaskReviewed() !== count ? (
+            data.is_review === false ? (
+              <div className="grid grid-cols-2 gap-2 relative z-10 mt-6">
+                <Link
+                  href={`/dashboard/home/surah/${data.id}`}
+                  className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center">
+                  {data.review_type === "حفظ" ? "ابدأ الحفظ" : "ابدأ المراجعة"}
+                </Link>
+                {data.review_type !== "إجازة" && (
+                  <button
+                    type="button"
+                    className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center"
+                    onClick={() => handleUpdate(data.id as string)}>
+                    أنهيت المهمة
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-2 relative z-10 mt-6">
+                <p className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center">
+                  لقد اتممت الحفظ بنجاح 🎉
+                </p>
+              </div>
+            )
+          ) : null}
         </motion.div>
         <motion.div
           initial={initial}

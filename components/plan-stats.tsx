@@ -1,6 +1,7 @@
+import React from "react";
 import { formatDate, formatDay } from "@/lib/format/format-date";
 import { PlanDay, PlanStatsType } from "@/types/type";
-import React from "react";
+import { motion } from "motion/react";
 
 interface PlanStats {
   plan: PlanDay[];
@@ -9,15 +10,59 @@ interface PlanStats {
   handleCheckPlanExists: () => Promise<void>;
 }
 
+/**
+ * initial={initial}
+    animate={animate}
+    variants={{
+      hidden: {
+        opacity: 0,
+        y: -50,
+      },
+      visible: visible,
+    }}
+    transition={{
+      duration: 1,
+      ease: "easeInOut",
+    }}
+      const visible = {
+    opacity: 1,
+    y: 0,
+  };
+  const initial = "hidden";
+  const animate = "visible";
+ */
+
 export default function PlanStats({
   plan,
   planData,
   loading,
   handleCheckPlanExists,
 }: PlanStats) {
+  const visible = {
+    opacity: 1,
+    y: 0,
+  };
+  const initial = "hidden";
+  const animate = "visible";
   return (
-    <div className="">
-      <h1 className="text-7xl font-extrabold font-readex">خطة التحفيظ</h1>
+    <motion.div
+      initial={initial}
+      animate={animate}
+      variants={{
+        hidden: {
+          opacity: 0,
+          y: 50,
+        },
+        visible: visible,
+      }}
+      transition={{
+        duration: 1,
+        ease: "easeInOut",
+      }}
+      className="">
+      <motion.h1 className="text-7xl font-extrabold font-readex">
+        خطة التحفيظ
+      </motion.h1>
       <div className="flex items-start flex-col gap-2.5">
         <div className="flex flex-wrap items-center gap-2.5 my-4">
           <div className="ml-4  inline-block py-2 px-4 md:py-4 md:px-8 text-white bg-gradient-to-t from-purple-800 to-purple-700/80 dark:from-purple-800/70 dark:to-purple-700 border-purple-500 border-2 rounded-2xl  flex-col justify-center text-center w-fit">
@@ -58,14 +103,16 @@ export default function PlanStats({
             <p>{planData ? formatDay(planData.totalVacationDays) : null} يوم</p>
           </div>
         </div>
-        <button
+        <motion.button
+          whileHover={{ scale: 1.06 }}
+          whileTap={{ scale: 0.95 }}
           type="button"
           className="ml-4 mt-4 inline-block py-2 px-4 md:py-4 md:px-8 bg-gradient-to-t to-orange-400 from-orange-500  shadow border-2 border-orange-400 rounded-2xl  flex-col justify-center text-center w-fit text-white"
           onClick={handleCheckPlanExists}
           disabled={loading}>
           تسجيل خريطه الحفظ
-        </button>
+        </motion.button>
       </div>
-    </div>
+    </motion.div>
   );
 }

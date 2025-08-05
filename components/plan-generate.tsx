@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import DeletePlanModel from "./delete-plan-model";
 import FromGeneratePlan from "./form-generate-plan";
+import { motion } from "motion/react";
 
 interface planOfHifz {
   day: string;
@@ -40,6 +41,13 @@ export default function GeneratePlan({ userId }: GeneratePlanProps) {
     totalReviewDays: number;
     totalVacationDays: number;
   } | null>(null);
+
+  const visible = {
+    opacity: 1,
+    y: 0,
+  };
+  const initial = "hidden";
+  const animate = "visible";
 
   const [pending, setPending] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -237,11 +245,24 @@ export default function GeneratePlan({ userId }: GeneratePlanProps) {
               {plan ? (
                 <div>
                   {plan && plan.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 my-3">
+                    <motion.div
+                      initial={initial}
+                      animate={animate}
+                      variants={{
+                        hidden: {
+                          opacity: 0,
+                        },
+                        visible: visible,
+                      }}
+                      transition={{
+                        duration: 1,
+                        ease: "easeInOut",
+                      }}
+                      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 my-3">
                       {plan.map((item, index) => (
                         <PlanCard plan={item} key={index} />
                       ))}
-                    </div>
+                    </motion.div>
                   ) : (
                     <div className="text-lg font-medium text-center">
                       لا يوجد خطه للحفظ
@@ -249,9 +270,22 @@ export default function GeneratePlan({ userId }: GeneratePlanProps) {
                   )}
                 </div>
               ) : (
-                <div className="text-lg font-medium text-center">
+                <motion.div
+                  initial={initial}
+                  animate={animate}
+                  variants={{
+                    hidden: {
+                      opacity: 0,
+                      y: 50,
+                    },
+                    visible: visible,
+                  }}
+                  transition={{
+                    duration: 1,
+                  }}
+                  className="text-lg font-medium text-center">
                   لا يوجد خطه للحفظ
-                </div>
+                </motion.div>
               )}
             </div>
           </>
