@@ -82,7 +82,7 @@ export default function Dashboard({ planStats }: DashboardProps) {
     };
 
     fetchTodayTask();
-  }, [planStats, supabase]);
+  }, [planStats]);
 
   const handleUpdate = async (itemId: string) => {
     const { data, error } = await supabase
