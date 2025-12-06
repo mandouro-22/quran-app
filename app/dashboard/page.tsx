@@ -12,7 +12,13 @@ export default async function ProtectedPage() {
     .from("plan")
     .select("id")
     .eq("user_id", data.user.id);
-  if (errPlan) throw errPlan;
+  if (errPlan) {
+    console.error("Error fetching plan:", errPlan);
+    // throw Error(errPlan.message);
+  }
+
+  console.log(plan);
+
   if (plan) redirect("/dashboard/home");
-  redirect("/dashboard/generate-plan");
+  return redirect("/dashboard/generate-plan");
 }

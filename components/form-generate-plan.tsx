@@ -13,6 +13,7 @@ interface FromGeneratePlanType {
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   loading: boolean;
   pending: boolean;
+  totalPlan?: number;
 }
 
 export default function FromGeneratePlan({
@@ -21,6 +22,7 @@ export default function FromGeneratePlan({
   handleInputChange,
   loading,
   pending,
+  totalPlan,
 }: FromGeneratePlanType) {
   const visible = {
     opacity: 1,
@@ -45,7 +47,8 @@ export default function FromGeneratePlan({
             duration: 1,
             ease: "easeInOut",
           }}
-          className="w-full space-y-2">
+          className="w-full space-y-2"
+        >
           <Label className="text-base font-medium mb-1.5">عدد السنين</Label>
           <Input
             type="number"
@@ -70,7 +73,8 @@ export default function FromGeneratePlan({
             duration: 1,
             ease: "easeInOut",
           }}
-          className="w-full space-y-2">
+          className="w-full space-y-2"
+        >
           <Label className="text-base font-medium mb-1.5">عدد الشهور</Label>
           <Input
             type="number"
@@ -98,13 +102,15 @@ export default function FromGeneratePlan({
           duration: 1,
           ease: "easeInOut",
         }}
-        className="flex items-center justify-center">
+        className="flex items-center justify-center"
+      >
         <motion.button
           whileHover={{ scale: 1.06 }}
           whileTap={{ scale: 0.95 }}
-          disabled={loading || pending}
+          disabled={loading || pending || totalPlan! > 0}
           type="submit"
-          className="font-medium text-base flex items-center justify-center bg-violet-600 hover:bg-violet-700 text-white shadow h-9 px-4 py-2 transition-all rounded-lg">
+          className="font-medium text-base flex items-center justify-center bg-violet-600 hover:bg-violet-700 text-white shadow h-9 px-4 py-2 transition-all rounded-lg"
+        >
           {pending ? (
             <Loader className="animate-spin transition-all duration-150" />
           ) : (

@@ -3,11 +3,11 @@
 import React from "react";
 import { getActiviteType } from "@/components/plan-card";
 import { formatDate, formatDay } from "@/lib/format/format-date";
-import { createClient } from "@/lib/supabase/client";
 import { PlanDay } from "@/types/type";
 import { Check } from "lucide-react";
 import { motion } from "motion/react";
 import Pagination from "@/components/pagination";
+import { supabase } from "@/lib/supabase/client";
 
 interface DailyLog {
   id: string;
@@ -39,8 +39,6 @@ export default function DailyLog() {
   React.useEffect(() => {
     const handleGetAllPlan = async () => {
       try {
-        const supabase = createClient();
-
         const user = await supabase.auth.getUser();
         if (user.error) {
           throw new Error(user.error.message);
@@ -96,7 +94,8 @@ export default function DailyLog() {
           transition={{
             duration: 1,
           }}
-          className="space-y-6">
+          className="space-y-6"
+        >
           <h1 className="text-3xl md:text-5xl font-extrabold text-gray-800 dark:text-white">
             السجل
           </h1>
@@ -127,7 +126,8 @@ export default function DailyLog() {
                   ease: "easeInOut",
                 }}
                 key={item.id}
-                className="space-y-2 border border-gray-200 dark:border-gray-800/40 shadow p-2 rounded-lg relative">
+                className="space-y-2 border border-gray-200 dark:border-gray-800/40 shadow p-2 rounded-lg relative"
+              >
                 {item.is_review ? (
                   <div className="absolute left-2 top-2 bg-gradient-to-t to-green-400 from-green-700 w-6 h-6 rounded-full flex items-center justify-center mr-auto">
                     <Check size={18} className="text-white" />
@@ -139,7 +139,8 @@ export default function DailyLog() {
                 <div
                   className={`font-medium text-white border-2 bg-gradient-to-t text-sm ${getActiviteType(
                     item.review_type
-                  )} w-fit px-4 py-1 rounded-lg`}>
+                  )} w-fit px-4 py-1 rounded-lg`}
+                >
                   {item.review_type}
                 </div>
                 {item.review_type !== "إجازة" ? (
@@ -185,7 +186,8 @@ export default function DailyLog() {
               }}
               transition={{
                 duration: 1,
-              }}>
+              }}
+            >
               لم تقم بتسجيل الخطه من الاساس
             </motion.div>
           )}

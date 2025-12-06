@@ -1,12 +1,12 @@
 "use client";
 
 import { formatDay } from "@/lib/format/format-date";
-import { createClient } from "@/lib/supabase/client";
 import { PlanDay, PlanStatsType } from "@/types/type";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { useCallback, useEffect, useState } from "react";
 import { motion } from "motion/react";
+import { supabase } from "@/lib/supabase/client";
 
 interface DashboardProps {
   planStats: PlanStatsType & {
@@ -17,7 +17,6 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ planStats }: DashboardProps) {
-  const supabase = createClient();
   const [data, setData] = useState<PlanDay | null>(null);
   const [review, setReview] = useState<{ is_review: boolean }[] | null>(null);
   const [count, setCount] = useState<number | null>(null);
@@ -140,7 +139,8 @@ export default function Dashboard({ planStats }: DashboardProps) {
             visible: visible,
           }}
           transition={transition}
-          className="relative rounded-2xl overflow-hidden p-8 bg-gradient-to-t from-pink-700 via-purple-700 to-indigo-700">
+          className="relative rounded-2xl overflow-hidden p-8 bg-gradient-to-t from-pink-700 via-purple-700 to-indigo-700"
+        >
           <div className="absolute inset-0 backdrop-blur-[10px] blur-2xl bg-white/10 pointer-events-none z-10" />
           <div className="relative z-10 flex flex-col items-start text-white space-y-2.5">
             <h3 className="text-2xl font-semibold">الخطة الحالية</h3>
@@ -164,7 +164,8 @@ export default function Dashboard({ planStats }: DashboardProps) {
             visible: visible,
           }}
           transition={transition}
-          className="relative rounded-2xl overflow-hidden p-8 bg-gradient-to-t via-orange-500 from-orange-600 to-orange-600">
+          className="relative rounded-2xl overflow-hidden p-8 bg-gradient-to-t via-orange-500 from-orange-600 to-orange-600"
+        >
           <div className="absolute inset-0 backdrop-blur-[20px] bg-white/5 pointer-events-none z-10" />
           <div className="relative z-10 flex flex-col items-start text-white space-y-2.5">
             {AllTaskReviewed() !== count ? (
@@ -208,14 +209,16 @@ export default function Dashboard({ planStats }: DashboardProps) {
               <div className="grid grid-cols-2 gap-2 relative z-10 mt-6">
                 <Link
                   href={`/dashboard/home/surah/${data.id}`}
-                  className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center">
+                  className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center"
+                >
                   {data.review_type === "حفظ" ? "ابدأ الحفظ" : "ابدأ المراجعة"}
                 </Link>
                 {data.review_type !== "إجازة" && (
                   <button
                     type="button"
                     className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center"
-                    onClick={() => handleUpdate(data.id as string)}>
+                    onClick={() => handleUpdate(data.id as string)}
+                  >
                     أنهيت المهمة
                   </button>
                 )}
@@ -240,7 +243,8 @@ export default function Dashboard({ planStats }: DashboardProps) {
             visible: visible,
           }}
           transition={transition}
-          className="relative rounded-2xl overflow-hidden p-8 bg-gradient-to-t from-violet-700 via-purple-600 to-violet-700">
+          className="relative rounded-2xl overflow-hidden p-8 bg-gradient-to-t from-violet-700 via-purple-600 to-violet-700"
+        >
           <div className="absolute inset-1 backdrop-blur-[20px] rounded-2xl bg-white/5 pointer-events-none z-10" />
           <div className="relative z-10 flex flex-col items-start text-white space-y-2.5">
             <h3 className="text-xl font-semibold">عدد الايام التى تم حفظها</h3>
@@ -261,7 +265,8 @@ export default function Dashboard({ planStats }: DashboardProps) {
             visible: visible,
           }}
           transition={transition}
-          className="relative rounded-2xl overflow-hidden p-8 bg-gradient-to-t from-violet-700 via-purple-600 to-violet-700">
+          className="relative rounded-2xl overflow-hidden p-8 bg-gradient-to-t from-violet-700 via-purple-600 to-violet-700"
+        >
           <div className="absolute inset-1 backdrop-blur-[20px] rounded-2xl bg-white/5 pointer-events-none z-10" />
           <div className="relative z-10 flex flex-col items-start text-white space-y-2.5">
             <h3 className="text-xl font-semibold">
@@ -288,10 +293,12 @@ export default function Dashboard({ planStats }: DashboardProps) {
           },
         }}
         transition={transition}
-        className="w-full flex items-center my-6">
+        className="w-full flex items-center my-6"
+      >
         <Link
           href={"/dashboard/dailylog"}
-          className="w-full flex items-center justify-center bg-purple-400/20 hover:bg-purple-500/30 dark:bg-white/20 dark:hover:bg-white/30 dark:text-white font-bold py-3 px-4 rounded-xl backdrop-blur-sm transition">
+          className="w-full flex items-center justify-center bg-purple-400/20 hover:bg-purple-500/30 dark:bg-white/20 dark:hover:bg-white/30 dark:text-white font-bold py-3 px-4 rounded-xl backdrop-blur-sm transition"
+        >
           تابع سجلك اليومى
         </Link>
       </motion.div>

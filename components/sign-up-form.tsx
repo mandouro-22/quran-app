@@ -1,7 +1,5 @@
 "use client";
-
 import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,72 +9,57 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { memo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { registerSchema, typeRegisterSchema } from "@/lib/validation/auth";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "./ui/form";
+import { translateSupabaseError } from "@/lib/format/supabase-errors";
+import { supabase } from "@/lib/supabase/client";
 
 export default memo(function SignUpForm() {
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const form = useForm<typeRegisterSchema>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const supabase = createClient();
+  const handleSignUp = async (value: typeRegisterSchema) => {
     setIsLoading(true);
     setError(null);
 
-    if (password !== repeatPassword) {
-      setError("كلمتا المرور غير متطابقتين");
-      setIsLoading(false);
-      return;
-    }
-    if (!fullName) {
-      setError("الرجاء إدخال الاسم الكامل");
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.signUp({
-        email,
-        password,
+      const { error } = await supabase.auth.signUp({
+        email: value.email,
+        password: value.password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
-            full_name: fullName,
+            full_name: value.name,
           },
         },
       });
 
-      if (error) throw error;
-
-      if (!user?.id) {
-        setError("تم إرسال رابط التفعيل، من فضلك فعّل بريدك الإلكتروني أولاً.");
-        setIsLoading(false);
+      if (error) {
+        setError(translateSupabaseError(error));
         return;
       }
-
-      const sendProfileData = {
-        id: user.id,
-        full_name: fullName,
-      };
-
-      const { error: errProfile } = await supabase
-        .from("profiles")
-        .update(sendProfileData)
-        .eq("id", user.id)
-        .select("id");
-
-      if (errProfile) throw errProfile;
 
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
@@ -94,62 +77,87 @@ export default memo(function SignUpForm() {
           <CardDescription>إنشاء حساب جديد</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignUp}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="full-name">الاسم الكامل</Label>
-                <Input
-                  id="full-name"
-                  type="text"
-                  placeholder="الاسم الكامل"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSignUp)}>
+              <div className="flex flex-col gap-6">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>الاسم الكامل</FormLabel>
+                      <FormControl>
+                        <Input placeholder="الاسم الكامل" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">البريد الإلكتروني</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+
+                {/* الإيميل */}
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>البريد الإلكتروني</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="m@example.com"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">كلمة المرور</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+
+                {/* كلمة المرور */}
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>كلمة المرور</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="repeat-password">تأكيد كلمة المرور</Label>
-                <Input
-                  id="repeat-password"
-                  type="password"
-                  required
-                  value={repeatPassword}
-                  onChange={(e) => setRepeatPassword(e.target.value)}
+
+                {/* تأكيد كلمة المرور */}
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>تأكيد كلمة المرور</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
+                {error && <p className="text-sm text-red-500">{error}</p>}
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "جارٍ إنشاء الحساب..." : "إنشاء حساب"}
+                </Button>
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "جارٍ إنشاء الحساب..." : "إنشاء حساب"}
-              </Button>
-            </div>
-            <div className="mt-4 text-center text-sm">
-              هل لديك حساب بالفعل؟{" "}
-              <Link href="/auth/login" className="underline underline-offset-4">
-                تسجيل الدخول
-              </Link>
-            </div>
-          </form>
+              <div className="mt-4 text-center text-sm">
+                هل لديك حساب بالفعل؟{" "}
+                <Link
+                  href="/auth/login"
+                  className="underline underline-offset-4"
+                >
+                  تسجيل الدخول
+                </Link>
+              </div>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

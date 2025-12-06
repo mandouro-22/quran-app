@@ -5,10 +5,7 @@ import React from "react";
 export interface PlanData {
   number: number;
   name: string;
-  // englishName: string;
-  // englishNameTranslation: string;
   numberOfAyahs: number;
-  // revelationType: string;
 }
 
 interface PlanContextType {
