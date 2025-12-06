@@ -1,5 +1,5 @@
 "use client";
-import { createClient } from "@/lib/supabase/client";
+import { supabase } from "@/lib/supabase/client";
 import { Bot } from "lucide-react";
 import { useEffect, useState } from "react";
 type ChatMessage = {
@@ -129,7 +129,6 @@ export default function ChatBoxComp() {
   useEffect(() => {
     const handleGetUser = async () => {
       try {
-        const supabase = createClient();
         const { data, error } = await supabase.auth.getUser();
         if (error) {
           console.error(error.message);
@@ -154,7 +153,8 @@ export default function ChatBoxComp() {
                 className={`relative w-fit space-y-2 my-3 ${
                   item.role === "user" ? "ml-auto" : "mr-auto"
                 }`}
-                key={index}>
+                key={index}
+              >
                 <strong className="flex items-center justify-center bg-gradient-to-tr via-indigo-700 from-blue-800 to-purple-700 rounded-full w-10 h-10 mr-auto text-white">
                   {item.role === "user" ? (
                     userName?.charAt(0)
@@ -165,7 +165,8 @@ export default function ChatBoxComp() {
                 <p
                   className={`w-fit px-6 py-2 rounded-lg text-white 
                     ${item.role === "user" ? "bg-black/10" : "bg-white/10"}
-                  `}>
+                  `}
+                >
                   {item.content}
                 </p>
               </div>
@@ -193,7 +194,8 @@ export default function ChatBoxComp() {
           <button
             onClick={handleSend}
             disabled={loading}
-            className="mt-2 bg-purple-600 text-white px-4 py-2 rounded w-full">
+            className="mt-2 bg-purple-600 text-white px-4 py-2 rounded w-full"
+          >
             {loading ? "جاري التحميل..." : "أرسل للمساعد"}
           </button>
         </div>
