@@ -21,7 +21,6 @@ export default async function Home() {
     .single();
 
   if (error && !data) {
-    console.error(error.message);
     return redirect("/dashboard/generate-plan");
   }
 

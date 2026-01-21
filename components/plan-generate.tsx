@@ -83,7 +83,7 @@ export default memo(function GeneratePlan({ userId }: GeneratePlanProps) {
         totalVacationDays,
       });
     },
-    [surahAndAyah]
+    [surahAndAyah],
   );
 
   const handleGeneratePlan = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -168,8 +168,6 @@ export default memo(function GeneratePlan({ userId }: GeneratePlanProps) {
         review_type: item.review_type,
       }));
 
-      console.log(items[0]);
-
       const batchSize = 50;
       for (let i = 0; i < items.length; i += batchSize) {
         const batch = items.slice(i, i + batchSize);
@@ -185,8 +183,6 @@ export default memo(function GeneratePlan({ userId }: GeneratePlanProps) {
           await supabase.from("plan").delete().eq("id", planRow.id);
           toast.error("فشل في حفظ عناصر الخطة");
           return;
-        } else {
-          console.log(`تم إدراج دفعة رقم ${i / batchSize + 1} بنجاح`);
         }
       }
 

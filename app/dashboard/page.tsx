@@ -17,8 +17,6 @@ export default async function ProtectedPage() {
     // throw Error(errPlan.message);
   }
 
-  console.log(plan);
-
-  if (plan) redirect("/dashboard/home");
+  if (plan && plan.length > 0) redirect("/dashboard/home");
   return redirect("/dashboard/generate-plan");
 }

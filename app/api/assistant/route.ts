@@ -5,11 +5,11 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { prompt } = body;
-    console.log(prompt);
+
     if (!prompt || typeof prompt !== "string" || prompt.trim() === "") {
       return NextResponse.json(
         { error: "Prompt is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     console.error(error);
     return NextResponse.json(
       { error: "Failed to get response from LLM" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
