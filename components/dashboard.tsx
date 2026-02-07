@@ -67,13 +67,13 @@ export default function Dashboard({ planStats }: DashboardProps) {
       setReview(totalReviewAndDays);
       setCount(count);
       const hifzLength = numberDayOfHifz.filter(
-        (item) => item.review_type === "حفظ"
+        (item) => item.review_type === "حفظ",
       );
       const reviewLength = numberDayOfHifz.filter(
         (item) =>
           item.review_type === "مراجعة أسبوعية" ||
           item.review_type === "مراجعة الشهر السابق" ||
-          item.review_type === "مراجعة الشهرين السابقين"
+          item.review_type === "مراجعة الشهرين السابقين",
       );
       setNumberOfDaysHifz(hifzLength);
       setReviewNumber(reviewLength);
@@ -172,29 +172,31 @@ export default function Dashboard({ planStats }: DashboardProps) {
               <>
                 <h3 className="text-xl font-semibold">مهمة اليوم</h3>
                 <h1 className="text-3xl font-extrabold">{data.review_type}</h1>
-                <div className="flex items-center flex-wrap gap-2.5">
-                  <div className="text-base text-gray-100">
-                    من سورة{" "}
-                    <span className="font-bold text-white">
-                      {data.from_surah}
-                    </span>{" "}
-                    الاية رقم{" "}
-                    <span className="font-bold text-white">
-                      {formatDay(data.from_ayah)}
-                    </span>
+                {data.review_type !== "اٍجازة" ? (
+                  <div className="flex items-center flex-wrap gap-2.5">
+                    <div className="text-base text-gray-100">
+                      من سورة{" "}
+                      <span className="font-bold text-white">
+                        {data.from_surah}
+                      </span>{" "}
+                      الاية رقم{" "}
+                      <span className="font-bold text-white">
+                        {formatDay(data.from_ayah)}
+                      </span>
+                    </div>
+                    <span className="text-gray-100">-</span>
+                    <div className="text-base text-gray-100">
+                      إلى سورة{" "}
+                      <span className="font-bold text-white">
+                        {data.to_surah}
+                      </span>{" "}
+                      الاية رقم{" "}
+                      <span className="font-bold text-white">
+                        {formatDay(data.to_ayah)}
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-gray-100">-</span>
-                  <div className="text-base text-gray-100">
-                    إلى سورة{" "}
-                    <span className="font-bold text-white">
-                      {data.to_surah}
-                    </span>{" "}
-                    الاية رقم{" "}
-                    <span className="font-bold text-white">
-                      {formatDay(data.to_ayah)}
-                    </span>
-                  </div>
-                </div>
+                ) : null}
               </>
             ) : (
               <div className="text-white font-bold text-xl text-center mt-6">
@@ -206,12 +208,20 @@ export default function Dashboard({ planStats }: DashboardProps) {
 
           {AllTaskReviewed() !== count ? (
             data.is_review === false ? (
-              <div className="grid grid-cols-2 gap-2 relative z-10 mt-6">
+              <div
+                className={`grid ${data.review_type === "إجازة" ? "grid-cols-1" : "grid-cols-2"} gap-2 relative z-10 mt-6`}
+              >
                 <Link
                   href={`/dashboard/home/surah/${data.id}`}
                   className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center"
                 >
-                  {data.review_type === "حفظ" ? "ابدأ الحفظ" : "ابدأ المراجعة"}
+                  {data.review_type === "حفظ"
+                    ? "ابدأ الحفظ"
+                    : data.review_type.includes("مراجعة")
+                      ? "ابدأ المراجعة"
+                      : data.review_type === "إجازة"
+                        ? "إجازة"
+                        : null}
                 </Link>
                 {data.review_type !== "إجازة" && (
                   <button
