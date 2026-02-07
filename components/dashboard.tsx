@@ -172,7 +172,7 @@ export default function Dashboard({ planStats }: DashboardProps) {
               <>
                 <h3 className="text-xl font-semibold">مهمة اليوم</h3>
                 <h1 className="text-3xl font-extrabold">{data.review_type}</h1>
-                {data.review_type !== "اٍجازة" ? (
+                {data.review_type !== "إجازة" ? (
                   <div className="flex items-center flex-wrap gap-2.5">
                     <div className="text-base text-gray-100">
                       من سورة{" "}
