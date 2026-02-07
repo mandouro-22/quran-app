@@ -211,18 +211,26 @@ export default function Dashboard({ planStats }: DashboardProps) {
               <div
                 className={`grid ${data.review_type === "إجازة" ? "grid-cols-1" : "grid-cols-2"} gap-2 relative z-10 mt-6`}
               >
-                <Link
-                  href={`/dashboard/home/surah/${data.id}`}
-                  className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center"
-                >
-                  {data.review_type === "حفظ"
-                    ? "ابدأ الحفظ"
-                    : data.review_type.includes("مراجعة")
-                      ? "ابدأ المراجعة"
-                      : data.review_type === "إجازة"
-                        ? "إجازة"
+                {data.review_type === "إجازة" ? (
+                  <div
+                    className="col-span-1 bg-white/20 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center opacity-50 cursor-not-allowed"
+                    role="link"
+                    aria-disabled="true"
+                  >
+                    إجازة
+                  </div>
+                ) : (
+                  <Link
+                    href={`/dashboard/home/surah/${data.id}`}
+                    className="col-span-1 bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-xl backdrop-blur-sm transition text-center"
+                  >
+                    {data.review_type === "حفظ"
+                      ? "ابدأ الحفظ"
+                      : data.review_type.includes("مراجعة")
+                        ? "ابدأ المراجعة"
                         : null}
-                </Link>
+                  </Link>
+                )}
                 {data.review_type !== "إجازة" && (
                   <button
                     type="button"
